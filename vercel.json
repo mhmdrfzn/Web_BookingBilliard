@@ -22,6 +22,6 @@
         "APP_ENV": "production",
         "APP_DEBUG": "true",
         "APP_URL": "https://billiard-booking.vercel.app",
-        "APP_KEY": "base64:..." 
+        "APP_KEY": "base64:Js5QP7GX4gAhepwUj2bFWgoqph5SmCte45T/RyLIpOQ=" 
     }
 }
