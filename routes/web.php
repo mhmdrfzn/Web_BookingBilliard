@@ -5,10 +5,10 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminBookingController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\WelcomeController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [WelcomeController::class, 'index']);
+
 
 Route::get('/dashboard', function () {
     return redirect()->route('customer.dashboard');
@@ -28,6 +28,10 @@ Route::middleware('auth')->group(function () {
 
     // Route untuk melihat history booking customer
     Route::get('/my-bookings', [BookingController::class, 'index'])->name('my-bookings');
+
+    // Payment Routes
+    Route::get('/booking/{id}/payment', [BookingController::class, 'payment'])->name('booking.payment');
+    Route::post('/booking/{id}/payment', [BookingController::class, 'processPayment'])->name('booking.payment.process');
 });
 
 // Admin Routes
@@ -43,6 +47,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Booking Management
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings.index');
     Route::patch('/booking/{id}', [AdminBookingController::class, 'updateStatus'])->name('booking.update');
+    Route::patch('/booking/{id}/payment', [AdminBookingController::class, 'verifyPayment'])->name('booking.verify-payment');
 });
 
 

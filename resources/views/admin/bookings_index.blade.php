@@ -72,7 +72,7 @@
                             <p class="text-sm font-semibold text-white">{{ $booking->user->name }}</p>
                             <p class="text-xs text-gray-500">{{ $booking->user->email }}</p>
                         </td>
-                        <td class="py-4 px-6 text-white font-semibold">Meja {{ $booking->table_number }}</td>
+                        <td class="py-4 px-6 text-white font-semibold">{{ $booking->product->name ?? 'Meja ' . $booking->table_number }}</td>
                         <td class="py-4 px-6">
                             <p class="text-sm text-gray-300">{{ \Carbon\Carbon::parse($booking->start_time)->format('d M Y') }}</p>
                             <p class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}</p>
@@ -119,8 +119,25 @@
                                         </button>
                                     </form>
                                 </div>
+                            @elseif($booking->status == 'approved' && $booking->payment_status == 'pending_verification')
+                                <div class="flex items-center justify-end">
+                                    <button onclick="openPaymentModal('{{ asset($booking->payment_proof) }}', '{{ route('admin.booking.verify-payment', $booking->id) }}')" 
+                                            class="px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500 text-yellow-400 hover:text-white font-semibold rounded-lg text-xs transition">
+                                        Verifikasi Bayar
+                                    </button>
+                                </div>
                             @else
-                                <span class="text-xs text-gray-500 text-right block">Selesai</span>
+                                <div class="flex items-center justify-end gap-2">
+                                    @if($booking->payment_status == 'unpaid')
+                                        <span class="text-xs text-red-400">Belum Bayar</span>
+                                    @elseif($booking->payment_status == 'paid')
+                                        <span class="text-xs text-green-400">✓ Lunas</span>
+                                    @elseif($booking->payment_status == 'failed')
+                                        <span class="text-xs text-red-400">Ditolak</span>
+                                    @else
+                                        <span class="text-xs text-gray-500">Selesai</span>
+                                    @endif
+                                </div>
                             @endif
                         </td>
                     </tr>
@@ -134,4 +151,67 @@
         </div>
     </div>
 </div>
+
+<!-- Payment Verification Modal -->
+<div id="paymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 bg-black/80 transition-opacity" aria-hidden="true" onclick="closePaymentModal()"></div>
+
+        <!-- Modal panel -->
+        <div class="inline-block align-bottom bg-[#1a1a1a] border border-white/10 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                        <h3 class="text-lg leading-6 font-medium text-white mb-4" id="modal-title">
+                            Verifikasi Pembayaran
+                        </h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-400 mb-4">Bukti Transfer:</p>
+                            <div class="bg-black/50 rounded-lg p-2 mb-4 border border-white/10">
+                                <img id="paymentProofImage" src="" alt="Payment Proof" class="w-full h-auto rounded object-contain max-h-[400px]">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-black/20 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
+                <form id="approveForm" method="POST" action="">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="payment_status" value="paid">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition">
+                        ✓ Terima Pembayaran
+                    </button>
+                </form>
+                
+                <form id="rejectForm" method="POST" action="">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="payment_status" value="failed">
+                    <button type="submit" class="mt-3 w-full inline-flex justify-center rounded-xl border border-red-500/30 shadow-sm px-4 py-2 bg-red-500/10 text-base font-medium text-red-400 hover:bg-red-500/20 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition">
+                        ✗ Tolak Pembayaran
+                    </button>
+                </form>
+
+                <button type="button" onclick="closePaymentModal()" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-500/30 shadow-sm px-4 py-2 bg-white/5 text-base font-medium text-gray-300 hover:bg-white/10 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openPaymentModal(imageSrc, actionUrl) {
+        document.getElementById('paymentProofImage').src = imageSrc;
+        document.getElementById('approveForm').action = actionUrl;
+        document.getElementById('rejectForm').action = actionUrl;
+        document.getElementById('paymentModal').classList.remove('hidden');
+    }
+
+    function closePaymentModal() {
+        document.getElementById('paymentModal').classList.add('hidden');
+    }
+</script>
 @endsection

@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800&display=swap" rel="stylesheet" />
     
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    
     <style>
         body { 
             font-family: 'Manrope', sans-serif; 
@@ -49,13 +53,65 @@
             color: #ffffff;
         }
         
-        /* Improve datetime input visibility */
-        input[type="datetime-local"] {
-            color-scheme: dark;
+        /* Flatpickr Custom Styling */
+        .flatpickr-calendar {
+            background: #1a1a1a !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 1rem !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
         }
-        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            cursor: pointer;
+        .flatpickr-months {
+            background: #1C4D8D !important;
+            border-radius: 1rem 1rem 0 0 !important;
+        }
+        .flatpickr-current-month {
+            color: white !important;
+        }
+        .flatpickr-weekdays {
+            background: #0A1F3D !important;
+        }
+        .flatpickr-weekday {
+            color: #5B9FD8 !important;
+        }
+        .flatpickr-day {
+            color: white !important;
+            border-radius: 0.5rem !important;
+        }
+        .flatpickr-day:hover {
+            background: #1C4D8D !important;
+            border-color: #1C4D8D !important;
+        }
+        .flatpickr-day.selected {
+            background: #1C4D8D !important;
+            border-color: #1C4D8D !important;
+        }
+        .flatpickr-day.today {
+            border-color: #5B9FD8 !important;
+        }
+        .flatpickr-time {
+            background: #0A1F3D !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+        .flatpickr-time input {
+            color: white !important;
+            background: #1a1a1a !important;
+        }
+        .flatpickr-time input:hover,
+        .flatpickr-time input:focus {
+            background: #1C4D8D !important;
+        }
+        .flatpickr-am-pm {
+            display: none !important; /* Hide AM/PM */
+        }
+        .numInputWrapper:hover,
+        .numInputWrapper:focus-within {
+            background: #1C4D8D !important;
+        }
+        .arrowUp, .arrowDown {
+            border-bottom-color: #5B9FD8 !important;
+        }
+        .arrowDown {
+            border-top-color: #5B9FD8 !important;
         }
     </style>
 </head>
@@ -80,7 +136,7 @@
                 <div class="flex items-center gap-3">
                     <a href="{{ route('customer.dashboard') }}" class="px-4 py-2 text-white font-medium bg-[#1C4D8D]/20 rounded-full transition-colors">Dashboard</a>
                     <a href="{{ route('my-bookings') }}" class="px-4 py-2 text-gray-300 hover:text-white font-medium transition-colors">All Bookings</a>
-                    <a href="{{ route('profile.edit') }}" class="px-4 py-2 text-gray-300 hover:text-white font-medium transition-colors">Profile</a>
+                    <!-- <a href="{{ route('profile.edit') }}" class="px-4 py-2 text-gray-300 hover:text-white font-medium transition-colors">Profile</a> -->
                     <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                         @csrf
                         <button type="submit" class="px-6 py-2.5 bg-red-500/90 hover:bg-red-600 text-white font-semibold rounded-full transition-all duration-300 hover:scale-105">
@@ -144,6 +200,53 @@
             </div>
         @endif
 
+        <!-- Quick Actions Section -->
+        <section class="mb-12 opacity-0 fade-in-up delay-100">
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Book a Table Card -->
+                <a href="{{ route('booking.create') }}" class="group relative bg-gradient-to-br from-[#1C4D8D] to-[#153A6A] rounded-3xl p-8 overflow-hidden hover:scale-[1.02] transition-all duration-300 hover:shadow-2xl hover:shadow-[#1C4D8D]/50">
+                    <!-- Background Pattern -->
+                    <div class="absolute inset-0 opacity-10">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-2xl"></div>
+                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full blur-xl"></div>
+                    </div>
+                    
+                    <div class="relative z-10">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                            </div>
+                            <svg class="w-6 h-6 text-white/60 group-hover:translate-x-1 group-hover:text-white transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-2">Book a Table</h3>
+                        <p class="text-blue-100 text-sm">Reserve your preferred table with detailed options</p>
+                    </div>
+                </a>
+
+                <!-- View All Bookings Card -->
+                <a href="{{ route('my-bookings') }}" class="group relative bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 rounded-3xl p-8 overflow-hidden hover:border-[#1C4D8D]/50 hover:scale-[1.02] transition-all duration-300">
+                    <div class="relative z-10">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-14 h-14 bg-[#1C4D8D]/20 backdrop-blur-sm rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <svg class="w-7 h-7 text-[#5B9FD8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                            </div>
+                            <svg class="w-6 h-6 text-gray-500 group-hover:translate-x-1 group-hover:text-[#5B9FD8] transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-2">My Bookings</h3>
+                        <p class="text-gray-400 text-sm">View and manage all your reservations</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
         <!-- My Bookings Section -->
         <section class="mb-12 opacity-0 fade-in-up delay-200">
             <div class="flex items-center justify-between mb-6">
@@ -161,7 +264,7 @@
                     @foreach($bookings as $booking)
                         <div class="group bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 rounded-3xl p-6 hover:border-[#1C4D8D]/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#1C4D8D]/20">
                             <div class="flex items-center justify-between mb-4">
-                                <div class="text-2xl font-bold text-white">Table {{ $booking->table_number }}</div>
+                                <div class="text-2xl font-bold text-white">{{ $booking->product->name ?? 'Meja ' . $booking->table_number }}</div>
                                 @if($booking->status == 'pending')
                                     <span class="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-xs font-bold rounded-full uppercase">Pending</span>
                                 @elseif($booking->status == 'approved')
@@ -239,7 +342,7 @@
 
                     <div>
                         <label class="block text-white font-semibold mb-2">Start Time</label>
-                        <input type="datetime-local" name="start_time" class="w-full px-4 py-3 bg-[#1a1a1a] border border-white/20 rounded-xl text-white focus:border-[#1C4D8D] focus:ring-2 focus:ring-[#1C4D8D]/50 transition-all" required>
+                        <input type="text" id="dashboard_start_time" name="start_time" class="w-full px-4 py-3 bg-[#1a1a1a] border border-white/20 rounded-xl text-white focus:border-[#1C4D8D] focus:ring-2 focus:ring-[#1C4D8D]/50 transition-all" placeholder="Select date and time" required>
                     </div>
 
                     <div>
@@ -382,6 +485,25 @@
 
         dashTableSelect.addEventListener('change', updateDashboardPrice);
         dashDurationSelect.addEventListener('change', updateDashboardPrice);
+    </script>
+
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // Initialize Flatpickr for dashboard start time
+        flatpickr("#dashboard_start_time", {
+            enableTime: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i",
+            altInput: true,
+            altFormat: "d/m/Y H:i",
+            minDate: "today",
+            minuteIncrement: 15,
+            disableMobile: true,
+            locale: {
+                firstDayOfWeek: 1
+            }
+        });
     </script>
 
 </body>

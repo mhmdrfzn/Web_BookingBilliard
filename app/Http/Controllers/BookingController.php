@@ -21,6 +21,7 @@ class BookingController extends Controller
         // Ambil data booking hanya milik user yang sedang login
         // Urutkan dari yang paling baru (descending)
         $bookings = Booking::where('user_id', Auth::id())
+                            ->with('product')
                             ->orderBy('created_at', 'desc')
                             ->get();
 
@@ -85,6 +86,7 @@ class BookingController extends Controller
         // 3. Simpan ke Database (Jika aman)
         $booking = Booking::create([
             'user_id'      => Auth::id(),
+            'product_id'   => $request->table_number, // Simpan product_id untuk relasi
             'table_number' => $request->table_number,
             'start_time'   => $startTime,
             'end_time'     => $endTime,
@@ -126,5 +128,57 @@ class BookingController extends Controller
 
         // 5. Kembali dengan pesan sukses
         return back()->with('success', 'Booking berhasil dibatalkan.');
+    }
+
+    public function payment($id)
+    {
+        $booking = Booking::with('product')->findOrFail($id);
+
+        // Security Check
+        if ($booking->user_id != Auth::id()) {
+            abort(403);
+        }
+
+        // Status Check
+        if ($booking->status != 'approved') {
+            return redirect()->route('my-bookings')->with('error', 'Booking belum disetujui.');
+        }
+
+        if ($booking->payment_status != 'unpaid' && $booking->payment_status != 'failed') {
+            return redirect()->route('my-bookings')->with('error', 'Booking sudah dibayar atau sedang diverifikasi.');
+        }
+
+        $banks = \App\Models\Bank::all();
+
+        return view('customer.payment', compact('booking', 'banks'));
+    }
+
+    public function processPayment(Request $request, $id)
+    {
+        $booking = Booking::findOrFail($id);
+
+        if ($booking->user_id != Auth::id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'payment_proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('payment_proof')) {
+            $imageName = time().'.'.$request->payment_proof->extension();
+            $request->payment_proof->move(public_path('payment_proofs'), $imageName);
+            
+            $booking->update([
+                'payment_proof' => 'payment_proofs/' . $imageName,
+                'payment_status' => 'pending_verification',
+            ]);
+
+            // Optional: Notify Admin
+            
+            return redirect()->route('my-bookings')->with('success', 'Bukti pembayaran berhasil diupload. Mohon tunggu verifikasi admin.');
+        }
+
+        return back()->with('error', 'Gagal upload bukti pembayaran.');
     }
 }

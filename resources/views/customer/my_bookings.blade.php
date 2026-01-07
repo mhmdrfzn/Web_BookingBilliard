@@ -108,7 +108,7 @@
                     @foreach($bookings as $booking)
                         <div class="group bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 rounded-3xl p-6 hover:border-[#1C4D8D]/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#1C4D8D]/20">
                             <div class="flex items-center justify-between mb-4">
-                                <div class="text-2xl font-bold text-white">Table {{ $booking->table_number }}</div>
+                                <div class="text-2xl font-bold text-white">{{ $booking->product->name ?? 'Meja ' . $booking->table_number }}</div>
                                 @if($booking->status == 'pending')
                                     <span class="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-xs font-bold rounded-full uppercase">Pending</span>
                                 @elseif($booking->status == 'approved')
@@ -117,6 +117,17 @@
                                     <span class="px-3 py-1 bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-bold rounded-full uppercase">Rejected</span>
                                 @else
                                     <span class="px-3 py-1 bg-gray-500/20 border border-gray-500/30 text-gray-400 text-xs font-bold rounded-full uppercase">Completed</span>
+                                @endif
+
+                                <!-- Payment Status Badge -->
+                                @if($booking->status == 'approved')
+                                    @if($booking->payment_status == 'unpaid')
+                                        <span class="px-3 py-1 bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-bold rounded-full uppercase ml-2">Unpaid</span>
+                                    @elseif($booking->payment_status == 'pending_verification')
+                                        <span class="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-xs font-bold rounded-full uppercase ml-2">Verifying</span>
+                                    @elseif($booking->payment_status == 'paid')
+                                        <span class="px-3 py-1 bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-bold rounded-full uppercase ml-2">Paid</span>
+                                    @endif
                                 @endif
                             </div>
                             
@@ -156,6 +167,10 @@
                                             Cancel
                                         </button>
                                     </form>
+                                @elseif($booking->status == 'approved' && $booking->payment_status == 'unpaid')
+                                    <a href="{{ route('booking.payment', $booking->id) }}" class="px-6 py-2 bg-gradient-to-r from-[#1C4D8D] to-[#153A6A] hover:from-[#2563B8] hover:to-[#1C4D8D] text-white font-bold text-sm rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-[#1C4D8D]/50">
+                                        Pay Now
+                                    </a>
                                 @endif
                             </div>
                         </div>

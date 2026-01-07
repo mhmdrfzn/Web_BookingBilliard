@@ -17,11 +17,10 @@ class AdminBookingController extends Controller
         $pendingCount = Booking::where('status', 'pending')->count();
         $todayCount   = Booking::whereDate('start_time', \Carbon\Carbon::today())->count();
         
-        // Hitung total uang dari booking yang statusnya SUDAH SELESAI/APPROVED
-        // Kita pakai sum('total_price')
-        $totalRevenue = Booking::where('status', 'approved')->sum('total_price'); 
+        // Hitung total uang dari booking yang pembayarannya SUDAH DIVERIFIKASI (payment_status == 'paid')
+        $totalRevenue = Booking::where('payment_status', 'paid')->sum('total_price'); 
 
-        $bookings = Booking::with('user')->orderBy('created_at', 'desc')->get();
+        $bookings = Booking::with(['user', 'product'])->orderBy('created_at', 'desc')->get();
 
         // Ganti totalCount jadi totalRevenue di compact
         return view('admin.bookings_index', compact('bookings', 'pendingCount', 'todayCount', 'totalRevenue'));
@@ -51,5 +50,20 @@ class AdminBookingController extends Controller
         // ---------------------------------------------------------
 
         return back()->with('success', 'Status booking diperbarui & notifikasi dikirim ke customer.');
+    }
+
+    public function verifyPayment(Request $request, $id)
+    {
+        $booking = Booking::findOrFail($id);
+
+        $request->validate([
+            'payment_status' => 'required|in:paid,failed'
+        ]);
+
+        $booking->update([
+            'payment_status' => $request->payment_status
+        ]);
+
+        return back()->with('success', 'Status pembayaran berhasil diperbarui.');
     }
 }

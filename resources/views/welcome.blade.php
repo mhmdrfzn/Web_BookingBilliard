@@ -124,7 +124,7 @@
                     <!-- Stats -->
                     <div class="grid grid-cols-3 gap-8 pt-8 border-t border-white/10">
                         <div>
-                            <div class="text-3xl font-bold text-white mb-1">12+</div>
+                            <div class="text-3xl font-bold text-white mb-1">{{ $totalTables }}+</div>
                             <div class="text-sm text-gray-500">Premium Tables</div>
                         </div>
                         <div>
@@ -151,30 +151,44 @@
                     <!-- Floating Card 1: Limited Slots -->
                     <div class="absolute top-8 -left-4 lg:left-8 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-xl">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                            <div class="w-10 h-10 {{ $availableTables > 0 ? ($availableTables <= 3 ? 'bg-red-500' : 'bg-green-500') : 'bg-gray-500' }} rounded-full flex items-center justify-center">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-white font-bold text-sm">Limited Slots</p>
-                                <p class="text-gray-300 text-xs">3 tables available</p>
+                                <p class="text-white font-bold text-sm">{{ $availableTables > 0 ? 'Limited Slots' : 'Fully Booked' }}</p>
+                                <p class="text-gray-300 text-xs">{{ $availableTables }} {{ $availableTables == 1 ? 'table' : 'tables' }} available</p>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Floating Card 2: Live Match -->
-                    <div class="absolute bottom-8 -right-4 lg:right-8 bg-[#1C4D8D]/90 backdrop-blur-xl border border-[#1C4D8D]/30 rounded-2xl p-4 shadow-xl">
-                        <div class="flex items-center gap-3">
-                            <div class="relative">
-                                <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                            </div>
-                            <div>
-                                <p class="text-white font-bold text-sm">Live Match</p>
-                                <p class="text-blue-100 text-xs">VIP Room #2</p>
+                    @if($liveMatch)
+                        <div class="absolute bottom-8 -right-4 lg:right-8 bg-[#1C4D8D]/90 backdrop-blur-xl border border-[#1C4D8D]/30 rounded-2xl p-4 shadow-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="relative">
+                                    <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                                </div>
+                                <div>
+                                    <p class="text-white font-bold text-sm">Live Match</p>
+                                    <p class="text-blue-100 text-xs">{{ $liveMatch->product->name ?? 'Table ' . $liveMatch->table_number }}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @else
+                        <div class="absolute bottom-8 -right-4 lg:right-8 bg-gray-700/90 backdrop-blur-xl border border-gray-600/30 rounded-2xl p-4 shadow-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="relative">
+                                    <div class="w-3 h-3 bg-gray-400 rounded-full"></div>
+                                </div>
+                                <div>
+                                    <p class="text-white font-bold text-sm">No Active Match</p>
+                                    <p class="text-gray-300 text-xs">All tables idle</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

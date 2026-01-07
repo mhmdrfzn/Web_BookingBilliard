@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800&display=swap" rel="stylesheet" />
     
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    
     <style>
         body { 
             font-family: 'Manrope', sans-serif; 
@@ -48,14 +52,68 @@
             color: #ffffff;
         }
         
-        /* Improve datetime input visibility */
-        input[type="datetime-local"] {
-            color-scheme: dark;
+        
+        /* Flatpickr Custom Styling */
+        .flatpickr-calendar {
+            background: #1a1a1a !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 1rem !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
         }
-        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            cursor: pointer;
+        .flatpickr-months {
+            background: #1C4D8D !important;
+            border-radius: 1rem 1rem 0 0 !important;
         }
+        .flatpickr-current-month {
+            color: white !important;
+        }
+        .flatpickr-weekdays {
+            background: #0A1F3D !important;
+        }
+        .flatpickr-weekday {
+            color: #5B9FD8 !important;
+        }
+        .flatpickr-day {
+            color: white !important;
+            border-radius: 0.5rem !important;
+        }
+        .flatpickr-day:hover {
+            background: #1C4D8D !important;
+            border-color: #1C4D8D !important;
+        }
+        .flatpickr-day.selected {
+            background: #1C4D8D !important;
+            border-color: #1C4D8D !important;
+        }
+        .flatpickr-day.today {
+            border-color: #5B9FD8 !important;
+        }
+        .flatpickr-time {
+            background: #0A1F3D !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+        .flatpickr-time input {
+            color: white !important;
+            background: #1a1a1a !important;
+        }
+        .flatpickr-time input:hover,
+        .flatpickr-time input:focus {
+            background: #1C4D8D !important;
+        }
+        .flatpickr-am-pm {
+            display: none !important; /* Hide AM/PM */
+        }
+        .numInputWrapper:hover,
+        .numInputWrapper:focus-within {
+            background: #1C4D8D !important;
+        }
+        .arrowUp, .arrowDown {
+            border-bottom-color: #5B9FD8 !important;
+        }
+        .arrowDown {
+            border-top-color: #5B9FD8 !important;
+        }
+    
     </style>
 </head>
 <body class="bg-black antialiased text-white overflow-x-hidden">
@@ -159,7 +217,7 @@
                             </svg>
                             Start Time
                         </label>
-                        <input type="datetime-local" name="start_time" class="w-full px-5 py-4 bg-[#1a1a1a] border border-white/20 rounded-2xl text-white text-lg focus:border-[#1C4D8D] focus:ring-2 focus:ring-[#1C4D8D]/50 transition-all" required>
+                        <input type="text" id="start_time_picker" name="start_time" class="w-full px-5 py-4 bg-[#1a1a1a] border border-white/20 rounded-2xl text-white text-lg focus:border-[#1C4D8D] focus:ring-2 focus:ring-[#1C4D8D]/50 transition-all" placeholder="Select date and time" required>
                     </div>
 
                     <div>
@@ -304,6 +362,25 @@
 
         tableSelect.addEventListener('change', updatePrice);
         durationSelect.addEventListener('change', updatePrice);
+    </script>
+
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // Initialize Flatpickr for start time picker
+        flatpickr("#start_time_picker", {
+            enableTime: true,
+            time_24hr: true, // Force 24-hour format
+            dateFormat: "Y-m-d H:i",
+            altInput: true,
+            altFormat: "d/m/Y H:i",
+            minDate: "today",
+            minuteIncrement: 15,
+            disableMobile: true, // Disable mobile native picker
+            locale: {
+                firstDayOfWeek: 1 // Week starts on Monday
+            }
+        });
     </script>
 
 </body>
